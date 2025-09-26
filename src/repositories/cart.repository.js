@@ -1,5 +1,5 @@
+// repositories/cart.repository.js
 import { cartDao } from "../daos/cart-dao.js";
-import CustomError from "../utils/custom-error.js";
 
 class CartRepository {
     constructor(dao) {
@@ -18,21 +18,21 @@ class CartRepository {
         return await this.dao.model.create(cart);
     };
 
-    delete = async (id) => {
-        return await this.dao.model.findByIdAndDelete(id);
-    };
-
-    clearCart = async (id) => {
-        return await this.dao.model.findByIdAndUpdate(
-            id,
-            { products: [] },
-            { new: true }
-        );
+    delete = async (id, deleteCart = "false") => {
+        if (deleteCart === "true") {
+            return await this.dao.model.findByIdAndDelete(id);
+        } else {
+            return await this.dao.model.findByIdAndUpdate(
+                id,
+                { products: [] },
+                { new: true }
+            );
+        }
     };
 
     addProductToCart = async (cartId, productId, quantity) => {
         const cart = await this.dao.model.findById(cartId);
-        if (!cart) throw new CustomError("Cart not found", 404);
+        if (!cart) return null;
 
         const existingProduct = cart.products.find(
             (p) => p.product.toString() === productId.toString()
@@ -51,7 +51,9 @@ class CartRepository {
     };
 
     updateProductsToCart = async (cartId, products) => {
+        // Vaciar carrito primero
         await this.delete(cartId);
+        // Agregar productos uno a uno
         for (const product of products) {
             await this.addProductToCart(cartId, product._id, product.quantity);
         }

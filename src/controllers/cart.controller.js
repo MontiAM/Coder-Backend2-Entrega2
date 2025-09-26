@@ -1,10 +1,14 @@
-import { cartRepository } from "../repositories/cart.repository.js";
-import CustomError from "../utils/custom-error.js";
+// controllers/cart.controller.js
+import { cartService } from "../services/cart.service.js";
 
 class CartController {
+    constructor(service) {
+        this.service = service;
+    }
+
     getAll = async (req, res, next) => {
         try {
-            const carts = await cartRepository.getAll();
+            const carts = await this.service.getAll();
             res.json(carts);
         } catch (err) {
             next(err);
@@ -14,8 +18,7 @@ class CartController {
     getById = async (req, res, next) => {
         try {
             const { cid } = req.params;
-            const cart = await cartRepository.getById(cid);
-            if (!cart) throw new CustomError("Cart not found", 404);
+            const cart = await this.service.getById(cid);
             res.json(cart);
         } catch (err) {
             next(err);
@@ -24,7 +27,7 @@ class CartController {
 
     create = async (req, res, next) => {
         try {
-            const cart = await cartRepository.create(req.body);
+            const cart = await this.service.create(req.body);
             res.status(201).json(cart);
         } catch (err) {
             next(err);
@@ -35,7 +38,7 @@ class CartController {
         try {
             const { cid } = req.params;
             const { deleteCart = "false" } = req.query;
-            const result = await cartRepository.delete(cid, deleteCart);
+            const result = await this.service.delete(cid, deleteCart);
             res.json(result);
         } catch (err) {
             next(err);
@@ -43,12 +46,10 @@ class CartController {
     };
 
     addProductToCart = async (req, res, next) => {
-        console.log(req.body);
-
         try {
             const { cid, pid } = req.params;
             const { quantity } = req.body;
-            const result = await cartRepository.addProductToCart(
+            const result = await this.service.addProductToCart(
                 cid,
                 pid,
                 quantity
@@ -65,7 +66,7 @@ class CartController {
             const products = Array.isArray(req.body)
                 ? req.body
                 : req.body.products;
-            const result = await cartRepository.updateProductsToCart(
+            const result = await this.service.updateProductsToCart(
                 cid,
                 products
             );
@@ -78,7 +79,7 @@ class CartController {
     removeProductFromCart = async (req, res, next) => {
         try {
             const { cid, pid } = req.params;
-            const result = await cartRepository.removeProductFromCart(cid, pid);
+            const result = await this.service.removeProductFromCart(cid, pid);
             res.json(result);
         } catch (err) {
             next(err);
@@ -86,4 +87,4 @@ class CartController {
     };
 }
 
-export const cartController = new CartController();
+export const cartController = new CartController(cartService);

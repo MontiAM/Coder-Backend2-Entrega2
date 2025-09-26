@@ -1,67 +1,65 @@
-import { cartRepository } from "../repositories/cart.repository";
+// services/cart.service.js
+import { cartRepository } from "../repositories/cart.repository.js";
+import CustomError from "../utils/custom-error.js";
 
 class CartService {
-    constructor(repository) {
-        this.repository = repository;
-    }
     getAll = async () => {
-        return await this.repository.getAll();
+        return await cartRepository.getAll();
     };
 
-    getById = async (id) => {
-        return await this.repository.findById(id);
+    getById = async (cid) => {
+        const cart = await cartRepository.getById(cid);
+        if (!cart) throw new CustomError("Cart not found", 404);
+        return cart;
     };
 
-    create = async (cart) => {
-        return await this.repository.create(cart);
+    create = async (data) => {
+        return await cartRepository.create(data);
     };
 
-    delete = async (id, deleteCart = "false") => {
-        let result;
-        if (deleteCart === "true") {
-            result = await this.repository.delete(id);
-        } else {
-            result = await this.repository.clearCart(id);
-        }
+    delete = async (cid, deleteCart = "false") => {
+        const result = await cartRepository.delete(cid, deleteCart);
+        if (!result) throw new CustomError("Cart not found", 404);
         return result;
     };
 
-    addProductToCart = async (cartId, productId, quantity) => {
-        const cart = await this.repository.findById(cartId);
+    addProductToCart = async (cid, pid, quantity) => {
+        if (!quantity || quantity <= 0) {
+            throw new CustomError("Quantity must be greater than zero", 400);
+        }
+
+        const cart = await cartRepository.getById(cid);
         if (!cart) throw new CustomError("Cart not found", 404);
 
-        const existingProduct = cart.products.find(
-            (p) => p.product.toString() === productId.toString()
-        );
-
-        if (existingProduct) {
-            existingProduct.quantity = quantity;
-        } else {
-            cart.products.push({ product: productId, quantity });
-        }
-
-        await cart.save();
-        return await this.repository
-            .findById(cartId)
-            .populate("products.product");
+        return await cartRepository.addProductToCart(cid, pid, quantity);
     };
 
-    updateProductsToCart = async (cartId, products) => {
-        await this.delete(cartId);
-        for (const product of products) {
-            await this.addProductToCart(cartId, product._id, product.quantity);
+    updateProductsToCart = async (cid, products) => {
+        if (!Array.isArray(products)) {
+            throw new CustomError("Products must be an array", 400);
         }
-        return await this.repository
-            .findById(cartId)
-            .populate("products.product");
+
+        for (const p of products) {
+            if (!p.quantity || p.quantity <= 0) {
+                throw new CustomError(
+                    "Each product must have a quantity greater than zero",
+                    400
+                );
+            }
+        }
+
+        const cart = await cartRepository.getById(cid);
+        if (!cart) throw new CustomError("Cart not found", 404);
+
+        return await cartRepository.updateProductsToCart(cid, products);
     };
 
     removeProductFromCart = async (cid, pid) => {
-        return await this.repository.updateOne(
-            { _id: cid },
-            { $pull: { products: { product: pid } } }
-        );
+        const cart = await cartRepository.getById(cid);
+        if (!cart) throw new CustomError("Cart not found", 404);
+
+        return await cartRepository.removeProductFromCart(cid, pid);
     };
 }
 
-export const cartService = new CartService(cartRepository);
+export const cartService = new CartService();

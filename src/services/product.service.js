@@ -28,17 +28,16 @@ class ProductService {
             if (!product) throw new CustomError("Product creation failed", 400);
             return product;
         } catch (error) {
-            throw new CustomError("Product creation failed", 400);
+            if (error instanceof CustomError) throw error; // 👈 respetar tus errores
+            throw new CustomError("Unexpected error creating product", 500);
         }
     }
-    async update(body, id) {
+    async update(id, body) {
         try {
             const exists = await this.repository.getById(id);
             if (!exists) throw new CustomError("Product not found", 404);
             if (exists.code !== body.code) {
-                const exists = await this.repository.getByCode(
-                    body.code
-                );
+                const exists = await this.repository.getByCode(body.code);
                 if (exists) throw new CustomError("Code already exists", 400);
             }
             const product = await this.repository.update(id, body);

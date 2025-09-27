@@ -44,6 +44,14 @@ class ProductRepository {
             throw error;
         }
     };
+
+    getByCode = async (code) => {
+        try {
+            return await this.dao.getByCode(code);
+        } catch (error) {
+            throw error;
+        }
+    };
 }
 
 export const productRepository = new ProductRepository(productDao);

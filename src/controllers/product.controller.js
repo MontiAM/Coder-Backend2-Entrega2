@@ -10,8 +10,8 @@ class ProductController {
     getAll = async (req, res, next) => {
         try {
             const products = await this.service.getAll();
-            products.map((p) => new ProductResponseDTO(p));
-            res.status(200).json(products);
+            const productsDTO = products.map((p) => new ProductResponseDTO(p));
+            res.status(200).json(productsDTO);
         } catch (error) {
             next(error);
         }

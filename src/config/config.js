@@ -6,4 +6,8 @@ export const {
     MONGO_PASS,
     MONGO_DB,
     MONGO_URI = `mongodb+srv://${MONGO_USR}:${MONGO_PASS}@cluster0.jffmlhp.mongodb.net/${MONGO_DB}?retryWrites=true&w=majority&appName=Cluster0`,
+    SMTP_HOST,
+    SMTP_PORT,
+    SMTP_USER,
+    SMTP_PASS,
 } = process.env;

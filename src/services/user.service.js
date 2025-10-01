@@ -46,6 +46,31 @@ class UserService {
             throw error;
         }
     };
+    updatePassword = async (email, newHashedPassword) => {
+        try {
+            const user = await this.userRepository.getUserByEmail(email);
+            if (!user) throw new CustomError("Usuario no encontrado", 404);
+
+            user.password = newHashedPassword;
+            const updatedUser = await this.userRepository.update(
+                user._id,
+                user
+            );
+
+            return updatedUser;
+        } catch (error) {
+            throw error;
+        }
+    };
+    getUserByEmail = async (email) => {
+        try {
+            const user = await this.userRepository.getUserByEmail(email);
+            return user;
+        } catch (error) {
+            throw error;
+        }
+    };
+
     generateToken = (user) => {
         const token = jwt.sign(
             {

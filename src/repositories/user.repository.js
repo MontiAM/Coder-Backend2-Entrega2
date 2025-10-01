@@ -12,6 +12,9 @@ class UserRepository {
     create = async (userData) => {
         return await this.dao.create(userData);
     };
+    update = async (id, updatedData) => {
+        return await this.dao.update(id, updatedData);
+    };
 }
 
 export const userRepository = new UserRepository(userDao);

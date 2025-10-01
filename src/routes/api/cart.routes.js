@@ -2,7 +2,7 @@ import { Router } from "express";
 import { cartController } from "../../controllers/cart.controller.js";
 import { verifyObjectId } from "../../middlewares/verify-objectid.js";
 import { passportCall } from "../../middlewares/passport/passport-call.js";
-import { handlePolicies } from "../../middlewares/handlerPolices.js";
+import { handlePolicies } from "../../middlewares/policies-handler.js";
 
 const router = Router();
 
